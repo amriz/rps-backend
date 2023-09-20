@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/games")
 class GameController(private val service: GameService) {
 
-    @GetMapping("/choice")
-    fun getGameChoices(): Game? = service.getGameChoices()
+    @GetMapping("/result")
+    fun getResults(): Game? = service.getResult()
 
     @PostMapping("/choice")
     fun runGame(@Valid @RequestBody playerPick: String) = service.runGame(playerPick)
