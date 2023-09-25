@@ -12,13 +12,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/games")
 class GameController(private val service: GameService) {
+
     @ExceptionHandler(NoSuchElementException::class)
     fun handleNotFound(e: NoSuchElementException): ResponseEntity<String> =
         ResponseEntity(e.message, HttpStatus.NOT_FOUND)
-
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleBadRequest(e: IllegalArgumentException): ResponseEntity<String> =
-        ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
 
     @GetMapping("/result")
     fun getResults(): Game? = service.getResult()
@@ -27,9 +24,8 @@ class GameController(private val service: GameService) {
     fun getScore(): Score = service.getScoring()
 
     @PostMapping("/choice")
-    fun runGame(@Valid @RequestBody playerPick: String) = service.runGame(playerPick)
+    fun runGame(@RequestBody playerPick: String) = service.sendOption(playerPick)
 
     @PostMapping("/reset")
     fun resetScore(@Valid @RequestBody score: Score) = service.resetScore(score)
-
 }

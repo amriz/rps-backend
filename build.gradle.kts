@@ -5,7 +5,6 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.3"
 	kotlin("jvm") version "1.9.10"
 	kotlin("plugin.spring") version "1.9.10"
-	kotlin("plugin.jpa") version "1.9.10"
 }
 
 group = "de.amru.game"
@@ -22,19 +21,14 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
-	implementation("org.projectlombok:lombok:1.18.22")
-	implementation("org.projectlombok:lombok:1.18.22")
-	implementation("org.projectlombok:lombok:1.18.22")
-	runtimeOnly("com.h2database:h2")
-	testImplementation("io.mockk:mockk:1.13.3")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("io.mockk:mockk:1.10.4")
 }
 
 tasks.withType<KotlinCompile> {

@@ -1,10 +1,10 @@
 package de.amru.game.rps.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.amru.game.rps.model.Game
-import de.amru.game.rps.model.Pick
+import de.amru.game.rps.model.Score
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -27,57 +27,78 @@ internal class GameControllerTest @Autowired constructor(
     @DisplayName("POST /api/games/choice")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class PostChoice {
-        var computer: Pick? = null
-        var player: Pick? = null
-        var game: Game? = null
-        private final val values: List<Pick> = Collections.unmodifiableList(Pick.values().toList())
-        @org.junit.jupiter.api.Test
+        @Test
         fun `should send the choice`() {
             // given
-            val playerpick = "ROCK"
-            player = Pick.valueOf(playerpick)
-            computer = randomChoice(values, Random().nextInt(values.size))
-            val newGame = Game(player!!, computer!!, "Computer")
-//            val newGame = Game(player = values.get(0), computer = values.get(1), winner = "Computer")
+            val playerSelection = "ROCK"
+            val resultObject ="Game(player=ROCK, computer=PAPER, winner=Computer)"
+
+            val newScore = Score(1,0)
 
             // when
             val performPost = mockMvc.post("$baseUrl/choice") {
-//                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(playerpick)
+                contentType = MediaType.TEXT_PLAIN
+                content = playerSelection
+            }
+
+            // then
+            performPost
+                .andExpect {
+                    content {
+                        objectMapper.writeValueAsString(resultObject)
+                    }
+                }
+
+            mockMvc.get("$baseUrl/result")
+                .andExpect { content { objectMapper.writeValueAsString(resultObject) } }
+
+            mockMvc.get("$baseUrl/score")
+                .andExpect { content { objectMapper.writeValueAsString(newScore) } }
+        }
+
+        @Test
+        fun `should return BAD REQUEST if the selection does not exist`() {
+            // given
+            val invalidSelection = "ROCKS"
+
+            // when
+            val performPost = mockMvc.post("$baseUrl/choice") {
+                contentType = MediaType.TEXT_PLAIN
+                content = invalidSelection
             }
 
             // then
             performPost
                 .andDo { print() }
+                .andExpect { status { isNotFound() } }
+        }
+
+    }
+
+    @Nested
+    @DisplayName("POST /api/games/choice")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class PostScore {
+        @Test
+        fun `should reset the score`() {
+            // given
+            val resetScore = Score(0,0)
+
+            // when
+            val performPost = mockMvc.post("$baseUrl/reset") {
+                content = resetScore
+            }
+
+            // then
+            performPost
                 .andExpect {
                     content {
-//                        contentType(MediaType.APPLICATION_JSON)
-                        objectMapper.writeValueAsString(playerpick)
+                        objectMapper.writeValueAsString(resetScore)
                     }
                 }
 
-            mockMvc.get("$baseUrl/result")
-                .andExpect { content { objectMapper.writeValueAsString(newGame) } }
-        }
-        private fun randomChoice(values: List<Pick>, random: Int): Pick {
-            return values.get(random)
+            mockMvc.get("$baseUrl/score")
+                .andExpect { content { objectMapper.writeValueAsString(resetScore) } }
         }
     }
-
-/*    @LocalServerPort
-    private val port = 9000
-
-    var restTemplate = TestRestTemplate()
-
-    var headers = HttpHeaders()
-
-    @Test
-    fun testPostPlayGame() {
-        val entity = HttpEntity<String>("ROCK", headers)
-        val response: ResponseEntity<String> = restTemplate.exchange<String>(
-            "http://localhost:$port/api/games/choice",
-            HttpMethod.POST, entity, String::class.java
-        )
-        assertEquals(HttpStatus.OK, response.statusCode)
-    }*/
 }
