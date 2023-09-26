@@ -43,6 +43,7 @@ internal class GameControllerTest @Autowired constructor(
 
             // then
             performPost
+                .andDo { print() }
                 .andExpect {
                     content {
                         objectMapper.writeValueAsString(resultObject)
