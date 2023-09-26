@@ -10,7 +10,7 @@ import de.amru.game.rps.model.Score
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 
-class GameServiceTest  {
+internal class GameServiceTest  {
     private val dataSource: GameDataSource = mockk(relaxed = true)
     private val service = GameService(dataSource)
     @Test
