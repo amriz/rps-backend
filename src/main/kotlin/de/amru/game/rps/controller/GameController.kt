@@ -18,7 +18,7 @@ class GameController(private val service: GameService) {
         ResponseEntity(e.message, HttpStatus.NOT_FOUND)
 
     @GetMapping("/result")
-    fun getResults(): Game? = service.getResult()
+    fun getResults(): Game = service.getResult()
 
     @GetMapping("/score")
     fun getScore(): Score = service.getScoring()
