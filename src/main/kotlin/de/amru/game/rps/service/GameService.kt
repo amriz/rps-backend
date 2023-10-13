@@ -12,11 +12,36 @@ import java.util.*
 class GameService(@Qualifier("mock") private val dataSource: GameDataSource) {
     var game = Game(Pick.ROCK, Pick.SCISSOR, "Computer")
     var score = Score(0,0)
+    val options: List<Pick> = Collections.unmodifiableList(Pick.values().toList())
 
-    fun sendOption(playerPick: String) : Game = dataSource.sendSelection(playerPick)
+    fun sendOption(player: String) : Game = startGame(player)
 
-    fun resetScore(score: Score) {
-        dataSource.resetScoring(score)
+    fun startGame(playerPick: String): Game {
+        val player = Pick.valueOf(playerPick)
+        val computer = options.get( Random().nextInt(options.size))
+        val winner = if (player == computer) {
+            setScoring(score)
+            NOBODY_WIN
+        } else if (firstBeatSecond(computer, player)) {
+            score.computer++
+            setScoring(score)
+            PC_WIN
+        } else {
+            score.player++
+            setScoring(score)
+            PLAYER_WIN
+        }
+
+        return dataSource.saveResult(player, computer, winner) // Game(player, computer, winner)
+    }
+
+    fun firstBeatSecond(a: Pick?, b: Pick?): Boolean {
+        return  a == Pick.ROCK      && b == Pick.SCISSOR ||
+                a == Pick.PAPER     && b == Pick.ROCK    ||
+                a == Pick.SCISSOR   && b == Pick.PAPER   ||
+                a == Pick.WELL      && b == Pick.ROCK    ||
+                a == Pick.WELL      && b == Pick.SCISSOR ||
+                a == Pick.PAPER     && b == Pick.WELL
     }
 
     fun getResult(): Game {
@@ -24,6 +49,21 @@ class GameService(@Qualifier("mock") private val dataSource: GameDataSource) {
     }
 
     fun getScoring(): Score {
-        return dataSource.getScoring()
+        return dataSource.getScorings()
+    }
+
+    fun setScoring(score: Score) {
+        return dataSource.saveScores(score)
+    }
+
+    fun resetScore(score: Score) {
+        this.score=Score(0,0)
+        setScoring(score)
+    }
+
+    companion object {
+        const val PLAYER_WIN = "You"
+        const val PC_WIN = "Computer"
+        const val NOBODY_WIN = "Nobody"
     }
 }
